@@ -1,6 +1,15 @@
-import React, { useEffect, useState } from 'react';
-import { BadgeCheck, FileImage, Phone, UsersRound, X, Pencil, Trash2, Eye } from 'lucide-react';
-import api from '../api';
+import React, { useEffect, useState } from "react";
+import {
+  BadgeCheck,
+  FileImage,
+  Phone,
+  UsersRound,
+  X,
+  Pencil,
+  Trash2,
+  Eye,
+} from "lucide-react";
+import api from "../api";
 
 function Modal({ title, onClose, children }) {
   const handleBackdrop = (e) => {
@@ -50,11 +59,14 @@ function DetailModal({ resident, onClose }) {
 
         <dl className="divide-y divide-slate-100 text-sm">
           {[
-            ['ID', resident.id],
-            ['Nama Lengkap', resident.full_name],
-            ['Nomor Telepon', resident.phone_number || '—'],
-            ['Status', resident.status === 'tetap' ? 'Tetap' : 'Kontrak'],
-            ['Status Menikah', resident.is_married ? 'Sudah Menikah' : 'Belum Menikah'],
+            ["ID", resident.id],
+            ["Nama Lengkap", resident.full_name],
+            ["Nomor Telepon", resident.phone_number || "—"],
+            ["Status", resident.status === "tetap" ? "Tetap" : "Kontrak"],
+            [
+              "Status Menikah",
+              resident.is_married ? "Sudah Menikah" : "Belum Menikah",
+            ],
           ].map(([label, value]) => (
             <div key={label} className="flex items-center justify-between py-3">
               <dt className="text-slate-500">{label}</dt>
@@ -77,12 +89,12 @@ function DetailModal({ resident, onClose }) {
 function EditModal({ resident, onClose, onUpdated }) {
   const [formData, setFormData] = useState({
     full_name: resident.full_name,
-    phone_number: resident.phone_number ?? '',
+    phone_number: resident.phone_number ?? "",
     status: resident.status,
     is_married: String(resident.is_married ? 1 : 0),
   });
   const [ktpFile, setKtpFile] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
@@ -90,28 +102,38 @@ function EditModal({ resident, onClose, onUpdated }) {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Khusus nomor telepon: hanya boleh angka
+  const handlePhoneChange = (e) => {
+    const onlyDigits = e.target.value.replace(/\D/g, "");
+    setFormData((prev) => ({ ...prev, phone_number: onlyDigits }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
 
     const payload = new FormData();
-    payload.append('_method', 'PUT');          
-    payload.append('full_name', formData.full_name);
-    payload.append('phone_number', formData.phone_number);
-    payload.append('status', formData.status);
-    payload.append('is_married', formData.is_married);
-    if (ktpFile) payload.append('ktp_photo', ktpFile);
+    payload.append("_method", "PUT");
+    payload.append("full_name", formData.full_name);
+    payload.append("phone_number", formData.phone_number);
+    payload.append("status", formData.status);
+    payload.append("is_married", formData.is_married);
+    if (ktpFile) payload.append("ktp_photo", ktpFile);
 
     try {
       await api.post(`/residents/${resident.id}`, payload, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+        headers: { "Content-Type": "multipart/form-data" },
       });
       onUpdated();
       onClose();
     } catch (err) {
       const errors = err.response?.data?.errors;
-      setError(errors ? Object.values(errors).flat().join(', ') : 'Gagal mengupdate penghuni.');
+      setError(
+        errors
+          ? Object.values(errors).flat().join(", ")
+          : "Gagal mengupdate penghuni.",
+      );
     } finally {
       setLoading(false);
     }
@@ -144,17 +166,20 @@ function EditModal({ resident, onClose, onUpdated }) {
             <Phone size={15} /> Nomor Telepon
           </label>
           <input
-            type="tel"
+            type="text"
+            inputMode="numeric"
             name="phone_number"
             value={formData.phone_number}
-            onChange={handleChange}
+            onChange={handlePhoneChange}
             className="w-full rounded-xl border border-slate-200 bg-white p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
           />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-700">Status</label>
+            <label className="mb-2 block text-sm font-medium text-slate-700">
+              Status
+            </label>
             <select
               name="status"
               value={formData.status}
@@ -166,7 +191,9 @@ function EditModal({ resident, onClose, onUpdated }) {
             </select>
           </div>
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-700">Status Menikah</label>
+            <label className="mb-2 block text-sm font-medium text-slate-700">
+              Status Menikah
+            </label>
             <select
               name="is_married"
               value={formData.is_married}
@@ -181,8 +208,10 @@ function EditModal({ resident, onClose, onUpdated }) {
 
         <div>
           <label className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-700">
-            <FileImage size={15} /> Ganti Foto KTP{' '}
-            <span className="text-xs font-normal text-slate-400">(opsional)</span>
+            <FileImage size={15} /> Ganti Foto KTP{" "}
+            <span className="text-xs font-normal text-slate-400">
+              (opsional)
+            </span>
           </label>
           <input
             type="file"
@@ -205,7 +234,7 @@ function EditModal({ resident, onClose, onUpdated }) {
             disabled={loading}
             className="flex-1 rounded-xl bg-slate-900 py-2.5 text-sm font-medium text-white transition hover:bg-slate-700 disabled:opacity-60"
           >
-            {loading ? 'Menyimpan…' : 'Simpan Perubahan'}
+            {loading ? "Menyimpan…" : "Simpan Perubahan"}
           </button>
         </div>
       </form>
@@ -215,17 +244,17 @@ function EditModal({ resident, onClose, onUpdated }) {
 
 function DeleteModal({ resident, onClose, onDeleted }) {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const handleDelete = async () => {
     setLoading(true);
-    setError('');
+    setError("");
     try {
       await api.delete(`/residents/${resident.id}`);
       onDeleted();
       onClose();
     } catch {
-      setError('Gagal menghapus penghuni. Coba lagi.');
+      setError("Gagal menghapus penghuni. Coba lagi.");
     } finally {
       setLoading(false);
     }
@@ -235,13 +264,11 @@ function DeleteModal({ resident, onClose, onDeleted }) {
     <Modal title="Hapus Penghuni" onClose={onClose}>
       <div className="space-y-4">
         <div className="rounded-2xl border border-rose-100 bg-rose-50 p-4 text-sm text-rose-700">
-          Apakah Anda yakin ingin menghapus{' '}
-          <span className="font-semibold">{resident.full_name}</span>? Tindakan ini tidak dapat
-          dibatalkan dan foto KTP akan ikut terhapus.
+          Apakah Anda yakin ingin menghapus{" "}
+          <span className="font-semibold">{resident.full_name}</span>? Tindakan
+          ini tidak dapat dibatalkan dan foto KTP akan ikut terhapus.
         </div>
-        {error && (
-          <p className="text-sm text-rose-600">{error}</p>
-        )}
+        {error && <p className="text-sm text-rose-600">{error}</p>}
         <div className="flex gap-3">
           <button
             onClick={onClose}
@@ -254,7 +281,7 @@ function DeleteModal({ resident, onClose, onDeleted }) {
             disabled={loading}
             className="flex-1 rounded-xl bg-rose-600 py-2.5 text-sm font-medium text-white transition hover:bg-rose-700 disabled:opacity-60"
           >
-            {loading ? 'Menghapus…' : 'Ya, Hapus'}
+            {loading ? "Menghapus…" : "Ya, Hapus"}
           </button>
         </div>
       </div>
@@ -264,18 +291,18 @@ function DeleteModal({ resident, onClose, onDeleted }) {
 
 export default function Residents() {
   const [residents, setResidents] = useState([]);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(true);
   const [detailTarget, setDetailTarget] = useState(null);
   const [editTarget, setEditTarget] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
 
   const [formData, setFormData] = useState({
-    full_name: '',
-    phone_number: '',
-    status: 'tetap',
-    is_married: '0',
+    full_name: "",
+    phone_number: "",
+    status: "tetap",
+    is_married: "0",
   });
   const [ktpFile, setKtpFile] = useState(null);
 
@@ -286,10 +313,10 @@ export default function Residents() {
   const fetchResidents = async () => {
     setLoading(true);
     try {
-      const res = await api.get('/residents');
+      const res = await api.get("/residents");
       setResidents(res.data?.data ?? []);
     } catch {
-      setError('Gagal memuat data penghuni.');
+      setError("Gagal memuat data penghuni.");
     } finally {
       setLoading(false);
     }
@@ -300,35 +327,52 @@ export default function Residents() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Khusus nomor telepon: hanya boleh angka
+  const handlePhoneChange = (e) => {
+    const onlyDigits = e.target.value.replace(/\D/g, "");
+    setFormData((prev) => ({ ...prev, phone_number: onlyDigits }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
+    setError("");
+    setSuccess("");
 
     if (!formData.full_name || !ktpFile) {
-      setError('Nama lengkap dan foto KTP wajib diisi.');
+      setError("Nama lengkap dan foto KTP wajib diisi.");
       return;
     }
 
     const payload = new FormData();
-    payload.append('full_name', formData.full_name);
-    payload.append('phone_number', formData.phone_number);
-    payload.append('status', formData.status);
-    payload.append('is_married', formData.is_married);
-    payload.append('ktp_photo', ktpFile);
+    payload.append("full_name", formData.full_name);
+    payload.append("phone_number", formData.phone_number);
+    payload.append("status", formData.status);
+    payload.append("is_married", formData.is_married);
+    payload.append("ktp_photo", ktpFile);
 
     try {
-      await api.post('/residents', payload, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+      await api.post("/residents", payload, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
-      setSuccess('Penghuni berhasil ditambahkan!');
+      setSuccess("Penghuni berhasil ditambahkan!");
       await fetchResidents();
-      setFormData({ full_name: '', phone_number: '', status: 'tetap', is_married: '0' });
+      setFormData({
+        full_name: "",
+        phone_number: "",
+        status: "tetap",
+        is_married: "0",
+      });
       setKtpFile(null);
-      document.getElementById('ktp-input-add')?.((el) => { el.value = ''; });
+      document.getElementById("ktp-input-add")?.((el) => {
+        el.value = "";
+      });
     } catch (err) {
       const errors = err.response?.data?.errors;
-      setError(errors ? Object.values(errors).flat().join(', ') : 'Gagal menyimpan penghuni.');
+      setError(
+        errors
+          ? Object.values(errors).flat().join(", ")
+          : "Gagal menyimpan penghuni.",
+      );
     }
   };
 
@@ -336,14 +380,17 @@ export default function Residents() {
     <>
       {/* ── Modals ── */}
       {detailTarget && (
-        <DetailModal resident={detailTarget} onClose={() => setDetailTarget(null)} />
+        <DetailModal
+          resident={detailTarget}
+          onClose={() => setDetailTarget(null)}
+        />
       )}
       {editTarget && (
         <EditModal
           resident={editTarget}
           onClose={() => setEditTarget(null)}
           onUpdated={() => {
-            setSuccess('Data penghuni berhasil diupdate!');
+            setSuccess("Data penghuni berhasil diupdate!");
             fetchResidents();
           }}
         />
@@ -353,7 +400,7 @@ export default function Residents() {
           resident={deleteTarget}
           onClose={() => setDeleteTarget(null)}
           onDeleted={() => {
-            setSuccess('Penghuni berhasil dihapus!');
+            setSuccess("Penghuni berhasil dihapus!");
             fetchResidents();
           }}
         />
@@ -367,13 +414,20 @@ export default function Residents() {
               <div className="inline-flex items-center gap-2 rounded-full bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700">
                 <UsersRound size={14} /> Data Penghuni
               </div>
-              <h2 className="mt-4 text-2xl font-bold text-slate-900">Kelola penghuni tetap dan kontrak</h2>
+              <h2 className="mt-4 text-2xl font-bold text-slate-900">
+                Kelola penghuni tetap dan kontrak
+              </h2>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
-                Menyimpan nama lengkap, foto KTP, status penghuni, nomor telepon, dan status menikah.
+                Menyimpan nama lengkap, foto KTP, status penghuni, nomor
+                telepon, dan status menikah.
               </p>
             </div>
             <button
-              onClick={() => document.getElementById('form-penghuni').scrollIntoView({ behavior: 'smooth' })}
+              onClick={() =>
+                document
+                  .getElementById("form-penghuni")
+                  .scrollIntoView({ behavior: "smooth" })
+              }
               className="rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-700"
             >
               + Tambah Penghuni
@@ -395,12 +449,24 @@ export default function Residents() {
         {/* ── Summary Cards ── */}
         <div className="grid gap-4 md:grid-cols-4">
           {[
-            ['Total penghuni', residents.length],
-            ['Status tetap', residents.filter((r) => r.status === 'tetap').length],
-            ['Status kontrak', residents.filter((r) => r.status === 'kontrak').length],
-            ['Sudah menikah', residents.filter((r) => r.is_married == 1).length],
+            ["Total penghuni", residents.length],
+            [
+              "Status tetap",
+              residents.filter((r) => r.status === "tetap").length,
+            ],
+            [
+              "Status kontrak",
+              residents.filter((r) => r.status === "kontrak").length,
+            ],
+            [
+              "Sudah menikah",
+              residents.filter((r) => r.is_married == 1).length,
+            ],
           ].map(([label, value]) => (
-            <div key={label} className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div
+              key={label}
+              className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm"
+            >
               <p className="text-sm text-slate-500">{label}</p>
               <p className="mt-3 text-2xl font-bold text-slate-900">{value}</p>
             </div>
@@ -411,12 +477,18 @@ export default function Residents() {
           {/* ── Table ── */}
           <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
             <div className="border-b border-slate-100 px-6 py-5">
-              <h3 className="text-base font-semibold text-slate-900">Daftar Penghuni</h3>
-              <p className="mt-1 text-sm text-slate-500">Data penghuni dari database.</p>
+              <h3 className="text-base font-semibold text-slate-900">
+                Daftar Penghuni
+              </h3>
+              <p className="mt-1 text-sm text-slate-500">
+                Data penghuni dari database.
+              </p>
             </div>
             <div className="overflow-x-auto max-h-125 overflow-y-auto">
               {loading ? (
-                <div className="p-8 text-center text-sm text-slate-400">Memuat data...</div>
+                <div className="p-8 text-center text-sm text-slate-400">
+                  Memuat data...
+                </div>
               ) : (
                 <table className="min-w-full divide-y divide-slate-200 text-sm">
                   <thead className="bg-slate-50 text-left text-slate-500 sticky top-0">
@@ -425,37 +497,51 @@ export default function Residents() {
                       <th className="px-4 py-3 font-medium">Status</th>
                       <th className="px-4 py-3 font-medium">Telepon</th>
                       <th className="px-4 py-3 font-medium">Menikah</th>
-                      <th className="px-4 py-3 font-medium text-center">Aksi</th>
+                      <th className="px-4 py-3 font-medium text-center">
+                        Aksi
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-200 bg-white">
                     {residents.length === 0 ? (
                       <tr>
-                        <td colSpan={5} className="px-4 py-8 text-center text-slate-400">
+                        <td
+                          colSpan={5}
+                          className="px-4 py-8 text-center text-slate-400"
+                        >
                           Belum ada data penghuni.
                         </td>
                       </tr>
                     ) : (
                       residents.map((r) => (
-                        <tr key={r.id} className="hover:bg-slate-50 transition-colors">
+                        <tr
+                          key={r.id}
+                          className="hover:bg-slate-50 transition-colors"
+                        >
                           <td className="px-4 py-4">
-                            <div className="font-medium text-slate-900">{r.full_name}</div>
-                            <div className="mt-1 text-xs text-slate-400">ID {r.id}</div>
+                            <div className="font-medium text-slate-900">
+                              {r.full_name}
+                            </div>
+                            <div className="mt-1 text-xs text-slate-400">
+                              ID {r.id}
+                            </div>
                           </td>
                           <td className="px-4 py-4">
                             <span
                               className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
-                                r.status === 'tetap'
-                                  ? 'bg-emerald-50 text-emerald-700'
-                                  : 'bg-amber-50 text-amber-700'
+                                r.status === "tetap"
+                                  ? "bg-emerald-50 text-emerald-700"
+                                  : "bg-amber-50 text-amber-700"
                               }`}
                             >
-                              {r.status === 'tetap' ? 'Tetap' : 'Kontrak'}
+                              {r.status === "tetap" ? "Tetap" : "Kontrak"}
                             </span>
                           </td>
-                          <td className="px-4 py-4 text-slate-600">{r.phone_number || '—'}</td>
                           <td className="px-4 py-4 text-slate-600">
-                            {r.is_married ? 'Sudah' : 'Belum'}
+                            {r.phone_number || "—"}
+                          </td>
+                          <td className="px-4 py-4 text-slate-600">
+                            {r.is_married ? "Sudah" : "Belum"}
                           </td>
                           {/* Action buttons */}
                           <td className="px-4 py-4">
@@ -500,8 +586,12 @@ export default function Residents() {
             id="form-penghuni"
             className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sticky top-6"
           >
-            <h3 className="text-base font-semibold text-slate-900">Form Tambah Penghuni</h3>
-            <p className="mt-1 text-sm text-slate-500">Isi data untuk menambahkan penghuni baru.</p>
+            <h3 className="text-base font-semibold text-slate-900">
+              Form Tambah Penghuni
+            </h3>
+            <p className="mt-1 text-sm text-slate-500">
+              Isi data untuk menambahkan penghuni baru.
+            </p>
 
             <form onSubmit={handleSubmit} className="mt-5 space-y-4">
               <div>
@@ -524,10 +614,11 @@ export default function Residents() {
                   <Phone size={16} /> Nomor Telepon
                 </label>
                 <input
-                  type="tel"
+                  type="text"
+                  inputMode="numeric"
                   name="phone_number"
                   value={formData.phone_number}
-                  onChange={handleInputChange}
+                  onChange={handlePhoneChange}
                   placeholder="Cth: 081234567890"
                   required
                   className="w-full rounded-xl border border-slate-200 bg-white p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
@@ -536,7 +627,9 @@ export default function Residents() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-slate-700">Status</label>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">
+                    Status
+                  </label>
                   <select
                     name="status"
                     value={formData.status}
@@ -548,7 +641,9 @@ export default function Residents() {
                   </select>
                 </div>
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-slate-700">Status Menikah</label>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">
+                    Status Menikah
+                  </label>
                   <select
                     name="is_married"
                     value={formData.is_married}
