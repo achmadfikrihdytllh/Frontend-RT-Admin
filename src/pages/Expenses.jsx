@@ -30,9 +30,16 @@ export default function Expenses() {
     expense_date: new Date().toISOString().split('T')[0],
   });
 
-  const formatRupiah = (number) =>
+    const formatRupiah = (number) =>
     new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(number || 0);
-
+    const formatTanggal = (dateStr) => {
+    if (!dateStr) return '-';
+    return new Date(dateStr).toLocaleDateString('id-ID', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+    });
+    };
   const totalPengeluaran = expenses.reduce((sum, e) => sum + Number(e.amount), 0);
 
   useEffect(() => {
@@ -139,7 +146,7 @@ export default function Expenses() {
                     </tr>
                   ) : expenses.map((e) => (
                     <tr key={e.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="px-4 py-3 text-slate-600">{e.expense_date}</td>
+                    <td className="px-4 py-3 text-slate-600">{formatTanggal(e.expense_date)}</td>
                       <td className="px-4 py-3">
                         <span className={`rounded-full px-3 py-1 text-xs font-semibold ${CATEGORY_STYLE[e.category] ?? 'bg-slate-100 text-slate-600'}`}>
                           {CATEGORIES.find(c => c.value === e.category)?.label ?? e.category}
